@@ -1,0 +1,63 @@
+name: Task / Feature
+description: Plan a sprint task or a firmware feature.
+title: "[Task]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for actionable CMFS work.
+        Assign an owner and sprint in the GitHub Project.
+
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Subsystem
+      options:
+        - Firmware application (fw-flight-computer)
+        - Flight logic (crates)
+        - Sensor drivers (crates)
+        - Rust / FreeRTOS integration
+        - Hardware bring-up
+        - Build tooling / CI
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What needs to be done, and why?
+      placeholder: Read barometer pressure over I2C.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What must work to complete this task?
+      placeholder: |
+        - [ ] Firmware builds successfully.
+        - [ ] Sensor readings are verified.
+        - [ ] Relevant tests pass.
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification Plan
+      description: How will this be tested?
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Notes
+      description: Related issues or known blockers.
+    validations:
+      required: false

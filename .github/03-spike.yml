@@ -1,0 +1,54 @@
+name: Technical Spike
+description: Investigate an uncertain technical approach.
+title: "[Spike]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Spikes are time-boxed investigations.
+        The goal is to produce evidence and a decision.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question / Risk
+      description: What uncertainty needs investigating?
+      placeholder: |
+        Can FreeRTOS run alongside the Teensy Rust BSP?
+    validations:
+      required: true
+
+  - type: textarea
+    id: experiment
+    attributes:
+      label: Experiment / Research Plan
+      description: What experiment will answer this question?
+    validations:
+      required: true
+
+  - type: textarea
+    id: completion
+    attributes:
+      label: Deliverables / Success Criteria
+      placeholder: |
+        - [ ] Minimal experiment completed.
+        - [ ] Results documented.
+        - [ ] Implementation decision recorded.
+    validations:
+      required: true
+
+  - type: input
+    id: timebox
+    attributes:
+      label: Time Box
+      placeholder: 1-2 development days
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References / Dependencies
+    validations:
+      required: false

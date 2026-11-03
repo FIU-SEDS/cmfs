@@ -1,0 +1,71 @@
+name: Bug Report
+description: Report a firmware, driver, or tooling defect.
+title: "[Bug]: "
+
+body:
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Affected Area
+      options:
+        - Firmware application
+        - Flight logic
+        - Sensor driver / bus
+        - FreeRTOS integration
+        - Build / flash tooling
+        - Hardware bring-up
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed Behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Build using `just build`.
+        2. Flash using `just flash`.
+        3. Observe the failure.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Board, firmware version, OS, and sensors.
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Measurements
+      description: Paste relevant debugging output.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact / Workaround
+      description: Describe severity and any workaround.
+    validations:
+      required: false
