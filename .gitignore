@@ -1,0 +1,24 @@
+# Rust build output
+target/
+**/target/
+
+# Generated firmware images
+output.hex
+fw-flight-computer/cmfs-bringup.hex
+*.elf
+*.bin
+
+# macOS
+.DS_Store
+
+## agents
+.claude/
+
+# Editor / IDE
+.idea/
+.vscode/
+
+# Temporary files
+*.swp
+*.swo
+*~

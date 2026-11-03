@@ -1,0 +1,10 @@
+[package]
+name = "cmfs-flight-computer"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+cortex-m = "0.7"
+teensy4-bsp = { version = "0.6", features = ["rt"] }
+teensy4-panic = "0.3"
