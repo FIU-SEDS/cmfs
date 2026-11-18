@@ -1,38 +1,22 @@
 # Development setup
 
-Install Rust with rustup and install `just`. The root `rust-toolchain.toml`
-selects stable Rust, rustfmt, Clippy, LLVM tools, and `thumbv7em-none-eabihf`.
-For HEX generation, install `cargo-binutils` with `cargo install cargo-binutils`.
-Flashing additionally requires `teensy_loader_cli` and a connected Teensy 4.1
-in a known-safe bench setup.
+CMFS targets the Teensy 4.1 with embedded C++. The C++ toolchain, language standard, board support, and build configuration are open decisions. Firmware builds, host tests, formatting, and flashing commands are pending the C++ baseline.
 
-Run these commands from the repository root:
+## Inspect available recipes
+
+If `just` is installed, run this from the repository root:
 
 ```sh
 just --list
-just build
-just hex
-just fmt
-just fmt-check
-just lint
-just clean
 ```
 
-`just flash` builds, generates `fw-flight-computer/cmfs-bringup.hex`, then runs
-`teensy_loader_cli --mcu=TEENSY41 -w -v cmfs-bringup.hex` from that directory.
-Only run it when hardware flashing is intended and the bench setup is safe.
-`just clean` removes Cargo build artifacts; the generated HEX remains until
-replaced by `just hex` or removed manually.
+The list includes recipes from the previous Rust firmware. The build, format, lint, and flash recipes still call Cargo directly or through dependencies. They require the former Rust workspace and cannot build or program C++ firmware.
 
-To verify the workspace directly:
+## Document the C++ baseline when it lands
 
-```sh
-cd fw-flight-computer
-cargo metadata --no-deps --format-version 1
-cargo fmt --all -- --check
-cargo build --release
-```
+- Record how to install the compiler and board support, including supported versions and the selected C++ standard.
+- Describe the firmware target, required dependencies, build invocation, and output artifact paths.
+- Document the host build and test commands and any formatting or lint tools configured in the repository.
+- Record the approved Teensy programming procedure once it has been verified in a known-safe bench setup.
 
-To inspect recipe dependencies without flashing, run `just --dry-run flash`
-from the repository root. Host tests are not configured yet because `crates/`
-is empty. See [ARCHITECTURE.md](ARCHITECTURE.md) for directory responsibilities.
+See the [architecture guide](ARCHITECTURE.md) for planned modules and [development workflow](DEVELOPMENT.md) for how to record validation.

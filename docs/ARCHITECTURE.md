@@ -1,54 +1,45 @@
 # Repository architecture
 
-CMFS targets the Teensy 4.1 (NXP i.MX RT1062, ARM Cortex-M7).
-Each board's firmware lives in its own Cargo workspace. The current workspace
-contains one application, `cmfs-bringup`.
+CMFS targets the Teensy 4.1 using embedded C++. The current checkout reserves `fw-flight-computer/` for the board-specific application. The C++ firmware entry point, board support, and build configuration are pending. The December 18, 2026 milestone is a bench prototype for the IREC 2027 program.
 
-```text
-cmfs/
-├── crates/                     # Reserved for reusable Rust libraries
-├── docs/                       # Setup and engineering documentation
-├── fw-flight-computer/
-│   ├── .cargo/config.toml      # Embedded target and linker flags
-│   ├── Cargo.toml              # Workspace members and resolver
-│   ├── Cargo.lock              # Resolved firmware dependencies
-│   └── app/
-│       ├── Cargo.toml          # cmfs-bringup package and dependencies
-│       └── src/main.rs         # Firmware entry point and board initialization
-├── just/                       # Reserved for shared just recipes
-├── tools/                      # Reserved for host-side utilities
-├── justfile                    # Development commands run from the repository root
-└── rust-toolchain.toml         # Rust toolchain, components, and embedded target
-```
+## Planned module boundaries
 
-`fw-flight-computer/Cargo.toml` defines the workspace; application dependencies
-belong in `app/Cargo.toml`. Any future workspace build profiles belong in the
-workspace manifest. The workspace owns a single `Cargo.lock` and `target/`
-directory. Run Cargo from `fw-flight-computer/` so it discovers `.cargo/config.toml`,
-which selects `thumbv7em-none-eabihf` and the BSP-provided `t4link.x` linker script.
+| Module | Responsibility |
+| --- | --- |
+| Board startup | Own pin configuration, peripheral initialization, and application startup in `fw-flight-computer/`. |
+| Sensor drivers | Own device protocol, sample conversion, and communication errors. Keep the bus interface explicit so conversions can be tested on a host. |
+| Flight-state logic | Evaluate state changes from supplied measurements. Keep the interface independent of Teensy and FreeRTOS headers so recorded or simulated measurements can drive host tests. |
+| Application tasks | Coordinate periodic sampling, pass measurement snapshots to state evaluation, and publish results for logging and telemetry. |
+| RTOS integration | Own FreeRTOS configuration, scheduler startup, and board-specific interrupt integration once a compatible port is validated. |
+| Host tools | Decode logs, inspect telemetry, and generate test data under `tools/` as needed. |
 
-`app/src/main.rs` owns the `no_std`/`no_main` entry point, Teensy BSP initialization,
-and panic-handler selection. It currently runs a buzzer bench demonstration on
-pin 6. FreeRTOS integration is not implemented by this restructuring.
+Keep the portable modules with the firmware initially. Introduce separate library targets when shared code or host testing requires them. Choose exact source and header paths when adding the first C++ build.
 
-As functionality grows, reusable drivers and hardware-independent flight logic
-belong in `crates/`. Drivers acquire measurements; flight logic evaluates state
-transitions; application tasks coordinate timing and communication. `crates/` is
-currently empty and has no host-test workspace. Likewise, `just/` and `tools/` are
-reserved directories rather than implemented tooling.
+## Measurements and task ownership
 
-Example:
-Hardware-independent flight-state logic belongs in crates/, for example a future crates/flight-core/ library.
-That library would define flight states and transition rules using measurements passed to it. It shouldn’t directly read sensors or call FreeRTOS.
-fw-flight-computer/app/ would initialize hardware, coordinate sensor readings, pass measurements into the state machine, and act on its results.
-This separation lets you test transitions on your computer with simulated measurements, without needing the Teensy.
+Sensor drivers supply readings or explicit errors. The sampling layer attaches timestamps and validity information, then publishes a coherent snapshot for state evaluation. Logging and telemetry consume measurements and state-change reports through interfaces defined by the application.
 
+Document measurement units, coordinate frames, timestamp sources, and sample periods in the types or interfaces that carry them. Exercise state evaluation with recorded or simulated data, including missing, stale, or invalid samples. Keep simulated inputs isolated from hardware control during bench tests.
 
-`just build` produces the ELF at
-`fw-flight-computer/target/thumbv7em-none-eabihf/release/cmfs-bringup`.
-`just hex` builds first and writes `fw-flight-computer/cmfs-bringup.hex`.
-`just flash` generates that HEX file before invoking the Teensy loader from the
-firmware workspace. Generated artifacts must not be committed.
+If FreeRTOS is adopted for the prototype, document which task owns each peripheral, the lifetime of queue data, and the expected stack, priority, and timing for each task. Validate startup and interrupt ownership for the selected Teensy support and FreeRTOS port. Keep interrupt handlers bounded and use the kernel's ISR-safe APIs when handing work to a task.
 
-See [SETUP.md](SETUP.md) for prerequisites and verification commands. Compilation
-and HEX generation do not establish hardware validation or flight qualification.
+## Engineering milestones
+
+| Stage | Evidence |
+| --- | --- |
+| C++ firmware baseline | Reproducible build for Teensy 4.1 and observable bench bring-up |
+| First sensor | Captured measurements with board, breakout, and interface documented |
+| Portable state evaluation | Host tests with representative input and error cases |
+| FreeRTOS feasibility | Observed scheduler startup and task execution on the selected port |
+| December 18 bench prototype | Real sensor snapshots exercised by software state evaluation with results recorded |
+
+Recovery and pyrotechnic outputs remain disconnected during routine bench work. Flight qualification requires a separate review and validation process.
+
+## Open decisions
+
+- C++ language standard, compiler, board support, and build system.
+- Host test framework and the layout of reusable modules.
+- FreeRTOS port and configuration ownership.
+- Sensor models, interface assignments, sampling rates, and telemetry formats.
+
+See [setup](SETUP.md) for available commands and [development workflow](DEVELOPMENT.md) for reporting test evidence.

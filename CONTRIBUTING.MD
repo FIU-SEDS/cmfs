@@ -2,7 +2,7 @@
 
 Thanks for contributing to **Cosmic Messenger Flight Software (CMFS)**, the FIU SEDS flight software project.
 
-CMFS is being developed in Rust for the Teensy 4.1, with FreeRTOS integration and sensor breakout boards. We are learning and validating parts of the stack as we go, so **small changes, clear documentation, and reproducible tests** are more important than large, complicated pull requests.
+CMFS is being developed in C++ for the Teensy 4.1, with sensor breakout boards and planned FreeRTOS integration. We are learning and validating parts of the stack as we go, so **small changes, clear documentation, and reproducible tests** are more important than large, complicated pull requests.
 
 Before making changes, read the repository [README](README.md) and any setup documentation in `docs/`. Use [GitHub Issues](https://github.com/FIU-SEDS/cmfs/issues) for tasks and bugs. Keep design discussions tied to an issue or pull request so decisions are easy to find later.
 
@@ -20,7 +20,7 @@ Before making changes, read the repository [README](README.md) and any setup doc
 - Examples:
   - `feature/bmp390-driver`
   - `feature/flight-state-machine`
-  - `spike/freertos-rust-interop`
+  - `spike/freertos-startup`
   - `fix/uart-buffer-overflow`
   - `docs/sensor-interface`
 
@@ -68,27 +68,14 @@ For hardware-dependent changes, include the **board, sensor breakout, interface 
 
 ## 5) Local checks before requesting review
 
-Run formatting and any build/test recipes available in your branch. For a Rust workspace, a baseline formatting check is:
+Follow [the setup guide](docs/SETUP.md) for the current tooling status. Run the formatting, build, and test checks configured for C++ on your branch. Use `just --list` to discover recipes and check which toolchain they invoke.
 
-```bash
-cargo fmt --all -- --check
-```
-
-As the repository's `justfile` and development tooling are established, use the recipes **that actually exist**. The intended interface is:
-
-```bash
-just --list       # Show available recipes
-just build        # Build firmware, once implemented
-just test         # Run available automated tests, once implemented
-just ci-checks    # Run consolidated checks, once implemented
-```
-
-**Do not assume all of these recipes or CI jobs exist yet.** Only treat a recipe as a required check once it is implemented and documented. If you cannot build or test locally, explain why in the PR and state what you *did* verify. Firmware flashing is not required for documentation-only changes.
+In the PR, include the checks you ran and any limits on verification. Documentation-only changes do not require flashing firmware.
 
 ## 6) Embedded software and review guidelines
 
 - **Safety and correctness:** Flight-state transitions, recovery-related logic, sensor validation, and error handling need explicit review and tests. Do not present a bench prototype as flight-qualified software.
-- **Rust:** Prefer safe Rust. Document each necessary `unsafe` block with the assumptions that make it sound, especially across C/FreeRTOS FFI boundaries.
+- **C++:** Make resource ownership and lifetimes explicit. Document callback, linkage, and ownership assumptions at C and FreeRTOS boundaries.
 - **FreeRTOS:** Explain task priorities, timing assumptions, stack sizes, and ownership of shared resources when adding or modifying tasks.
 - **Interrupts and concurrency:** Keep interrupt handlers short; use appropriate task notifications, queues, or synchronization primitives. Do not add blocking operations inside an ISR.
 - **Drivers:** Keep device-specific drivers separate from application logic. Handle initialization failures, invalid readings, and communication timeouts explicitly.
