@@ -1,22 +1,32 @@
 # Development setup
 
-CMFS targets the Teensy 4.1 with embedded C++. The C++ toolchain, language standard, board support, and build configuration are open decisions. Firmware builds, host tests, formatting, and flashing commands are pending the C++ baseline.
+CMFS targets the Teensy 4.1 with embedded C++. The current branch has a PlatformIO build for the FreeRTOS LED blink prototype. Toolchain and board support choices for the broader firmware baseline remain open.
 
-## Inspect available recipes
+## Build the Teensy 4.1 blink prototype
 
-If `just` is installed, run this from the repository root:
+With PlatformIO Core and `just` installed, run from the repository root:
 
 ```sh
 just --list
+just build
 ```
 
-The list includes recipes from the previous Rust firmware. The build, format, lint, and flash recipes still call Cargo directly or through dependencies. They require the former Rust workspace and cannot build or program C++ firmware.
+`just build` runs `pio run -e teensy41` in `fw-flight-computer/` and produces `fw-flight-computer/.pio/build/teensy41/firmware.hex`. PlatformIO compiles `src/`, `app/`, and `platform/teensy41/` using the source filter in [`platformio.ini`](../fw-flight-computer/platformio.ini). Includes such as `app/BlinkTask.hpp` resolve from the firmware project root.
+
+## Format firmware source
+
+Install `clang-format` and make it available on `PATH`. On macOS, the recipe can also discover the formatter provided by Apple’s Command Line Tools through `xcrun`.
+
+```sh
+just fmt
+```
+
+The recipe applies the root [`.clang-format`](../.clang-format) in place to C and C++ source and headers under `fw-flight-computer/src/`, `app/`, `include/`, and `platform/`. The NXP board files under `boards/`, third-party dependencies, and build output are outside its scope. Review the resulting diff before committing.
 
 ## Document the C++ baseline when it lands
 
-- Record how to install the compiler and board support, including supported versions and the selected C++ standard.
-- Describe the firmware target, required dependencies, build invocation, and output artifact paths.
-- Document the host build and test commands and any formatting or lint tools configured in the repository.
+- Record the selected toolchain, board support versions, and C++ standard for the firmware baseline.
+- Document host build and test commands and lint tools as they are configured.
 - Record the approved Teensy programming procedure once it has been verified in a known-safe bench setup.
 
 See the [architecture guide](ARCHITECTURE.md) for planned modules and [development workflow](DEVELOPMENT.md) for how to record validation.

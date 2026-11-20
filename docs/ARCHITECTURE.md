@@ -1,6 +1,8 @@
 # Repository architecture
 
-CMFS targets the Teensy 4.1 using embedded C++. The current checkout reserves `fw-flight-computer/` for the board-specific application. The C++ firmware entry point, board support, and build configuration are pending. The December 18, 2026 milestone is a bench prototype for the IREC 2027 program.
+CMFS targets the Teensy 4.1 using embedded C++. The current PlatformIO target builds the FreeRTOS LED blink prototype in `fw-flight-computer/`. The December 18, 2026 milestone is a bench prototype for the IREC 2027 program.
+
+`src/main.cpp` initializes the LED, creates the blink task, and starts the scheduler. `app/BlinkTask.cpp` controls the LED through the `IDigitalOutput` interface in `include/cmfs/hal/`. `platform/teensy41/` implements that interface with the Teensy Arduino APIs. Scheduler startup and task timing still need bench verification.
 
 ## Planned module boundaries
 
@@ -13,7 +15,7 @@ CMFS targets the Teensy 4.1 using embedded C++. The current checkout reserves `f
 | RTOS integration | Own FreeRTOS configuration, scheduler startup, and board-specific interrupt integration once a compatible port is validated. |
 | Host tools | Decode logs, inspect telemetry, and generate test data under `tools/` as needed. |
 
-Keep the portable modules with the firmware initially. Introduce separate library targets when shared code or host testing requires them. Choose exact source and header paths when adding the first C++ build.
+Keep the portable modules with the firmware initially. Introduce separate library targets when shared code or host testing requires them.
 
 ## Measurements and task ownership
 
@@ -21,7 +23,7 @@ Sensor drivers supply readings or explicit errors. The sampling layer attaches t
 
 Document measurement units, coordinate frames, timestamp sources, and sample periods in the types or interfaces that carry them. Exercise state evaluation with recorded or simulated data, including missing, stale, or invalid samples. Keep simulated inputs isolated from hardware control during bench tests.
 
-If FreeRTOS is adopted for the prototype, document which task owns each peripheral, the lifetime of queue data, and the expected stack, priority, and timing for each task. Validate startup and interrupt ownership for the selected Teensy support and FreeRTOS port. Keep interrupt handlers bounded and use the kernel's ISR-safe APIs when handing work to a task.
+For FreeRTOS tasks, document which task owns each peripheral, the lifetime of queue data, and the expected stack, priority, and timing. Validate startup and interrupt ownership for the selected Teensy support and FreeRTOS port. Keep interrupt handlers bounded and use the kernel's ISR-safe APIs when handing work to a task.
 
 ## Engineering milestones
 
@@ -37,7 +39,7 @@ Recovery and pyrotechnic outputs remain disconnected during routine bench work. 
 
 ## Open decisions
 
-- C++ language standard, compiler, board support, and build system.
+- C++ language standard, compiler, board support, and build system for the broader firmware baseline.
 - Host test framework and the layout of reusable modules.
 - FreeRTOS port and configuration ownership.
 - Sensor models, interface assignments, sampling rates, and telemetry formats.

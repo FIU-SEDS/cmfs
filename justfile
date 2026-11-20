@@ -1,52 +1,35 @@
-# CMFS Development Commands
+# CMFS developer commands
 
-# Show available commands
 default:
     @just --list
 
-# ==========================================
-# Firmware
-# ==========================================
-
-# Compile release firmware
+# Build the FreeRTOS Blink example for Teensy 4.1
 build:
-    cd fw-flight-computer && cargo build --release
+    cd fw-flight-computer && pio run -e teensy41
 
-# Generate Teensy 4.1 HEX firmware
-hex: build
-    cd fw-flight-computer && cargo objcopy --release -p cmfs-flight-computer --bin cmfs-flight-computer -- -O ihex cmfs-bringup.hex
+# Build and flash with Teensy Loader CLI
+flash: build
+    teensy_loader_cli --mcu=TEENSY41 -w -v fw-flight-computer/.pio/build/teensy41/firmware.hex
 
-# Flash firmware onto Teensy 4.1
-flash: hex
-    cd fw-flight-computer && teensy_loader_cli --mcu=TEENSY41 -w -v cmfs-bringup.hex
-
-# ==========================================
-# Code Quality
-# ==========================================
-
-# Format Rust source code
-fmt:
-    cd fw-flight-computer && cargo fmt --all
-
-# Verify formatting without modifying files
-fmt-check:
-    cd fw-flight-computer && cargo fmt --all -- --check
-
-# Run Clippy
-lint:
-    cd fw-flight-computer && cargo clippy --workspace --bins
-
-# ==========================================
-# Testing
-# ==========================================
-
-# Run quality checks
-ci-checks: fmt-check lint
-
-# ==========================================
-# Maintenance
-# ==========================================
-
-# Remove compiled artifacts
+# Clean the Teensy 4.1 build artifacts
 clean:
-    cd fw-flight-computer && cargo clean
+    cd fw-flight-computer && pio run -e teensy41 -t clean
+
+# Rebuild the Blink example from scratch
+rebuild: clean build
+
+# Build and display firmware memory usage
+size: build
+
+# Format project-owned firmware with the repository's .clang-format
+fmt:
+    #!/bin/sh
+    set -eu
+    formatter=clang-format
+    if ! command -v "$formatter" >/dev/null && command -v xcrun >/dev/null; then
+        formatter=$(xcrun --find clang-format)
+    fi
+    find fw-flight-computer/src fw-flight-computer/app \
+        fw-flight-computer/include fw-flight-computer/platform -type f \
+        \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.hpp' \) \
+        -exec "$formatter" --style=file -i {} +

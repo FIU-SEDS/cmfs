@@ -4,7 +4,7 @@ CMFS is the embedded C++ flight software project for FIU SEDS's Cosmic Messenger
 
 ## Development status
 
-CMFS is establishing its C++ firmware baseline. This checkout has no C++ firmware entry point or build configuration yet. FreeRTOS is planned for task scheduling and coordination. The December 18, 2026 milestone is a bench demonstration of sensor acquisition and software state evaluation.
+CMFS is establishing its C++ firmware baseline with a PlatformIO build for a FreeRTOS LED blink prototype on Teensy 4.1. The December 18, 2026 milestone is a bench demonstration of sensor acquisition and software state evaluation.
 
 ## Project goals
 
@@ -17,14 +17,14 @@ CMFS is establishing its C++ firmware baseline. This checkout has no C++ firmwar
 
 | Location | Purpose |
 | --- | --- |
-| `fw-flight-computer/` | Home for Teensy-specific startup, board configuration, and firmware application code as it is added |
+| `fw-flight-computer/` | Teensy startup, platform support, application code, and PlatformIO configuration |
 | `docs/` | Setup, architecture, and contributor workflow |
 | `tools/` | Reserved for host utilities such as log decoders |
-| `justfile` | Existing recipe list and legacy build commands |
+| `justfile` | Firmware build and formatting commands |
 
 ## Getting started
 
-Read the setup guide for the current build status and the architecture guide for planned module boundaries.
+Follow the setup guide to build with `just build` and format firmware source with `just fmt`.
 
 - [Setup](docs/SETUP.md)
 - [Repository architecture](docs/ARCHITECTURE.md)

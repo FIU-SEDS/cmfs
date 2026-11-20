@@ -2,7 +2,7 @@
 
 Thanks for contributing to **Cosmic Messenger Flight Software (CMFS)**, the FIU SEDS flight software project.
 
-CMFS is being developed in C++ for the Teensy 4.1, with sensor breakout boards and planned FreeRTOS integration. We are learning and validating parts of the stack as we go, so **small changes, clear documentation, and reproducible tests** are more important than large, complicated pull requests.
+CMFS is being developed in C++ for the Teensy 4.1. The current PlatformIO prototype uses FreeRTOS to blink the onboard LED, with sensor integration planned. We are learning and validating parts of the stack as we go, so **small changes, clear documentation, and reproducible tests** are more important than large, complicated pull requests.
 
 Before making changes, read the repository [README](README.md) and any setup documentation in `docs/`. Use [GitHub Issues](https://github.com/FIU-SEDS/cmfs/issues) for tasks and bugs. Keep design discussions tied to an issue or pull request so decisions are easy to find later.
 
@@ -68,7 +68,7 @@ For hardware-dependent changes, include the **board, sensor breakout, interface 
 
 ## 5) Local checks before requesting review
 
-Follow [the setup guide](docs/SETUP.md) for the current tooling status. Run the formatting, build, and test checks configured for C++ on your branch. Use `just --list` to discover recipes and check which toolchain they invoke.
+For firmware changes, run `just fmt` and review the formatting diff, then run `just build` for Teensy 4.1. Run applicable host tests as they become available. Use `just --list` to discover recipes and see the [setup guide](docs/SETUP.md) for tool requirements.
 
 In the PR, include the checks you ran and any limits on verification. Documentation-only changes do not require flashing firmware.
 

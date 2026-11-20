@@ -142,7 +142,7 @@ Replace `<files-you-changed>` with actual paths. Avoid committing generated firm
 
 ### Step 4 — Validate your work
 
-Use the [setup guide](SETUP.md) to identify checks configured for C++ on your branch. Once available, run host tests for portable code and use the Teensy target build for firmware changes. For documentation changes, check links and verify that the described commands and paths match the checkout.
+For firmware changes, apply the project's formatting with `just fmt`, review the diff, and compile the Teensy target with `just build`. Run host tests for portable code as they become available. For documentation changes, check links and verify that the described commands and paths match the checkout. See the [setup guide](SETUP.md) for tool requirements.
 
 **Report verification accurately:**
 

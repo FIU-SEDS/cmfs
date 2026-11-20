@@ -1,0 +1,27 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+# Indentation
+IndentWidth: 2
+ContinuationIndentWidth: 2
+UseTab: Never
+# Line length
+ColumnLimit: 100
+# Braces
+BreakBeforeBraces: Attach
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+# Pointers and references
+PointerAlignment: Left
+DerivePointerAlignment: false
+# Classes and namespaces
+AccessModifierOffset: -2
+NamespaceIndentation: None
+# Switch statements
+IndentCaseLabels: true
+# Includes
+SortIncludes: true
+IncludeBlocks: Preserve
+# General
+MaxEmptyLinesToKeep: 1
