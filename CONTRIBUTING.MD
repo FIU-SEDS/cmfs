@@ -68,7 +68,7 @@ For hardware-dependent changes, include the **board, sensor breakout, interface 
 
 ## 5) Local checks before requesting review
 
-For firmware changes, run `just fmt` and review the formatting diff, then run `just build` for Teensy 4.1. Run applicable host tests as they become available. Use `just --list` to discover recipes and see the [setup guide](docs/SETUP.md) for tool requirements.
+For firmware changes, run `just fmt` and review the formatting diff, then run `just build` for Teensy 4.1. Run applicable [host tests](docs/SETUP.md#run-host-tests). Use `just --list` to discover recipes and see the [setup guide](docs/SETUP.md) for tool requirements.
 
 In the PR, include the checks you ran and any limits on verification. Documentation-only changes do not require flashing firmware.
 

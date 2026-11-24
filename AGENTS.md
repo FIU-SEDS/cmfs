@@ -4,7 +4,7 @@ Cosmic Messenger Flight Software (CMFS) is the FIU SEDS embedded C++ project for
 
 ## Commands
 
-Check the root `justfile` and run `just --list` before using recipes. Use `just build` for the PlatformIO Teensy 4.1 prototype and `just fmt` to apply the root `.clang-format` to project-owned firmware. Host tests are pending configuration. Report only commands actually run.
+Check the root `justfile` and run `just --list` before using recipes. Use `just build` for the PlatformIO Teensy 4.1 prototype and `just fmt` to apply the root `.clang-format` to project-owned firmware. Run host tests using the CMake and CTest commands in [docs/SETUP.md](docs/SETUP.md#run-host-tests). Report only commands actually run.
 
 ## Code and architecture
 

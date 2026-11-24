@@ -7,7 +7,13 @@ default:
 build:
     cd fw-flight-computer && pio run -e teensy41
 
-# Check application C++ sources and headers with Clang
+# Configure, build, and run the GoogleTest host tests
+test:
+    cmake -S fw-flight-computer/tests -B fw-flight-computer/.pio/host-tests
+    cmake --build fw-flight-computer/.pio/host-tests
+    cd fw-flight-computer/.pio/host-tests && ctest --output-on-failure
+
+# Check application and core C++ sources and headers with Clang
 check-app:
     #!/bin/sh
     set -eu
@@ -18,7 +24,7 @@ check-app:
     cd fw-flight-computer
     pio run -e teensy41 -t compiledb
     driver_glob="${PLATFORMIO_CORE_DIR:-$HOME/.platformio}/packages/toolchain-*/bin/arm*-g++"
-    find app -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.cc' -o -name '*.h' \) \
+    find src/app src/core -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.cc' -o -name '*.h' \) \
         -exec sh -c '
             driver_glob=$1
             shift
@@ -52,7 +58,6 @@ fmt:
     if ! command -v "$formatter" >/dev/null && command -v xcrun >/dev/null; then
         formatter=$(xcrun --find clang-format)
     fi
-    find fw-flight-computer/src fw-flight-computer/app \
-        fw-flight-computer/include fw-flight-computer/platform -type f \
+    find fw-flight-computer/src fw-flight-computer/tests -type f \
         \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.hpp' \) \
         -exec "$formatter" --style=file -i {} +
