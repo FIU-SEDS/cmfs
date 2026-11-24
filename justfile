@@ -7,6 +7,29 @@ default:
 build:
     cd fw-flight-computer && pio run -e teensy41
 
+# Check application C++ sources and headers with Clang
+check-app:
+    #!/bin/sh
+    set -eu
+    if ! command -v clangd >/dev/null; then
+        echo 'Install clangd and add it to PATH to run just check-app.' >&2
+        exit 1
+    fi
+    cd fw-flight-computer
+    pio run -e teensy41 -t compiledb
+    driver_glob="${PLATFORMIO_CORE_DIR:-$HOME/.platformio}/packages/toolchain-*/bin/arm*-g++"
+    find app -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.cc' -o -name '*.h' \) \
+        -exec sh -c '
+            driver_glob=$1
+            shift
+            status=0
+            for source do
+                printf "Checking %s\n" "$source"
+                clangd --check="$source" --query-driver="$driver_glob" --tweaks=none --log=error || status=1
+            done
+            exit "$status"
+        ' sh "$driver_glob" {} +
+
 # Build and flash with Teensy Loader CLI
 flash: build
     teensy_loader_cli --mcu=TEENSY41 -w -v fw-flight-computer/.pio/build/teensy41/firmware.hex

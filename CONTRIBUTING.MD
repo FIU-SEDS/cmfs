@@ -74,6 +74,8 @@ In the PR, include the checks you ran and any limits on verification. Documentat
 
 ## 6) Embedded software and review guidelines
 
+Follow the [C++ naming conventions](docs/CODING_STYLE.md) for project-owned firmware. Check names during review when adding or renaming files or identifiers.
+
 - **Safety and correctness:** Flight-state transitions, recovery-related logic, sensor validation, and error handling need explicit review and tests. Do not present a bench prototype as flight-qualified software.
 - **C++:** Make resource ownership and lifetimes explicit. Document callback, linkage, and ownership assumptions at C and FreeRTOS boundaries.
 - **FreeRTOS:** Explain task priorities, timing assumptions, stack sizes, and ownership of shared resources when adding or modifying tasks.

@@ -8,6 +8,7 @@ Check the root `justfile` and run `just --list` before using recipes. Use `just 
 
 ## Code and architecture
 
+- Follow the [C++ naming conventions](docs/CODING_STYLE.md) when adding or renaming firmware files and identifiers.
 - Use C++ for application logic and drivers. Keep board support and C interfaces such as FreeRTOS localized. Document ownership, callback lifetimes, and linkage assumptions at those boundaries.
 - Use clear types and explicit ownership. Prefer scoped resource management where appropriate and make failure paths visible. Check target support before relying on standard library facilities, exceptions, RTTI, or dynamic allocation.
 - Keep driver code responsible for measurements, board code responsible for peripheral setup, and state evaluation independent of drivers and FreeRTOS. Put board startup and task coordination under `fw-flight-computer/`. Keep host utilities under `tools/`.

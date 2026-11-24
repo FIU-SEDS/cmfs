@@ -2,7 +2,21 @@
 
 CMFS targets the Teensy 4.1 using embedded C++. The current PlatformIO target builds the FreeRTOS LED blink prototype in `fw-flight-computer/`. The December 18, 2026 milestone is a bench prototype for the IREC 2027 program.
 
-`src/main.cpp` initializes the LED, creates the blink task, and starts the scheduler. `app/BlinkTask.cpp` controls the LED through the `IDigitalOutput` interface in `include/cmfs/hal/`. `platform/teensy41/` implements that interface with the Teensy Arduino APIs. Scheduler startup and task timing still need bench verification.
+## Firmware directory layout
+
+Paths in this table are relative to [`fw-flight-computer/`](../fw-flight-computer/).
+
+| Directory | What belongs here | Current example |
+| --- | --- | --- |
+| `src/` | Firmware entry point and startup. Wire concrete hardware to application tasks, initialize it, and start the scheduler. | [`main.cpp`](../fw-flight-computer/src/main.cpp) initializes the LED and starts the blink task. |
+| `app/` | Application tasks and orchestration. Tasks decide when to run and coordinate work through interfaces. Keep task-specific headers next to their implementations. | [`BlinkTask.cpp`](../fw-flight-computer/app/BlinkTask.cpp) controls blink timing through `IDigitalOutput`. |
+| `include/` | Header search root for interfaces and types shared across firmware modules. | `#include "cmfs/hal/IDigitalOutput.hpp"` resolves from this directory. |
+| `include/cmfs/` | Project prefix for shared headers. Organize them by responsibility, such as `hal/` for hardware abstractions. | [`hal/`](../fw-flight-computer/include/cmfs/hal/) contains the current shared hardware interface. |
+| `include/cmfs/hal/` | Hardware abstraction layer (HAL). Define operations that callers need using board-independent C++ types and signatures. | [`IDigitalOutput.hpp`](../fw-flight-computer/include/cmfs/hal/IDigitalOutput.hpp) defines `write(bool high)`. |
+| `platform/` | Target-specific implementations and adapters that use board or framework APIs. | [`teensy41/`](../fw-flight-computer/platform/teensy41/) holds the current Teensy implementations. |
+| `platform/teensy41/` | Teensy 4.1 hardware setup and implementations of shared HAL interfaces. | [`TeensyLed.cpp`](../fw-flight-computer/platform/teensy41/TeensyLed.cpp) uses Arduino GPIO calls to initialize and drive the LED. |
+
+`src/` can depend on both application and platform code because it connects them at startup. Application code accesses board hardware through `cmfs/hal/`, so a task can use a different implementation without changing how it calls the hardware. Scheduler startup and task timing still need bench verification.
 
 ## Planned module boundaries
 
