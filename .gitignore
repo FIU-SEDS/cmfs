@@ -36,5 +36,7 @@ fw-flight-computer/cmfs-bringup.hex
 *.bin
 /.settings/
 
-# PlatformIO 
+# PlatformIO
 .pio
+.cache
+compile_commands.json
