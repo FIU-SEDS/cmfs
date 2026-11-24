@@ -12,4 +12,5 @@ target_include_directories(FlightStateMachineTest PRIVATE ../src)
 target_compile_features(FlightStateMachineTest PRIVATE cxx_std_17)
 target_link_libraries(FlightStateMachineTest PRIVATE GTest::gtest_main)
 
-add_test(NAME FlightStateMachineTest COMMAND FlightStateMachineTest)
+include(GoogleTest)
+gtest_discover_tests(FlightStateMachineTest)

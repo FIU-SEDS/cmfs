@@ -2,6 +2,12 @@
 
 void FlightStateMachine::update(const FlightData& Data) {
   switch (state_) {
+    case FlightState::INIT:
+      if (Data.sensors_healthy) {
+        state_ = FlightState::IDLE;
+      }
+      break;
+
     case FlightState::IDLE:
       if (Data.AccelerationZMps2 > 30.0f) {
         state_ = FlightState::BOOST;
