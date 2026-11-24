@@ -1,0 +1,12 @@
+CompileFlags:
+  CompilationDatabase: .
+  Remove: [-fipa-pta]
+
+---
+If:
+  PathMatch: .*\.(hpp|cpp|cc|cxx)
+CompileFlags:
+  Add: [-xc++]
+
+Diagnostics:
+  Suppress: "*"

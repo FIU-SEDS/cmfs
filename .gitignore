@@ -22,3 +22,21 @@ fw-flight-computer/cmfs-bringup.hex
 *.swp
 *.swo
 *~
+
+# MCUXpresso Workspace Level
+/.metadata/
+/*logs/
+
+# MCUXpresso Project Level
+*.axf
+*.su
+*.o
+*.d
+*.map
+*.bin
+/.settings/
+
+# PlatformIO
+.pio
+.cache
+compile_commands.json

@@ -5,7 +5,7 @@
 **Project:** [FIU-SEDS/cmfs](https://github.com/FIU-SEDS/cmfs)  
 **Prototype milestone:** December 18, 2026 (bench-top demonstration)
 
-This guide explains **how we collaborate**, from choosing a sprint task to merging a pull request (PR). You do **not** need to be an expert in Rust or FreeRTOS before contributing. Start with a small, testable change, ask questions in its GitHub Issue, and document what you learn.
+This guide explains **how we collaborate**, from choosing a sprint task to merging a pull request (PR). You do **not** need to be an expert in C++ or FreeRTOS before contributing. Start with a small, testable change, ask questions in its GitHub Issue, and document what you learn.
 
 > **One-line workflow:** **Onboard → select an issue → create a branch → implement → validate → open a PR → review → squash merge → close/verify the issue.**
 >
@@ -20,8 +20,8 @@ Before claiming your first issue:
 - [ ] Read the root [`README.md`](../README.md) for the project overview.
 - [ ] Read [`CONTRIBUTING.MD`](../CONTRIBUTING.MD) for branch and review rules. (Follow the filename actually used by the repository if its case differs.)
 - [ ] Read [`AGENTS.md`](../AGENTS.md) for repository-specific coding conventions and tool usage.
-- [ ] Complete [`docs/SETUP.md`](SETUP.md) to install the required toolchain.
-- [ ] Review the current [prototype roadmap](ROADMAP.md) and architecture notes, if present.
+- [ ] Read [the setup guide](SETUP.md) for the current tooling status.
+- [ ] Review the [architecture guide](ARCHITECTURE.md) and its bench milestones.
 - [ ] Ask a maintainer which **GitHub Project** tracks the current sprint and which issue is suitable for your first contribution.
 - [ ] Check available commands with `just --list` rather than assuming a command exists.
 
@@ -30,40 +30,11 @@ Clone the project and inspect it:
 ```bash
 git clone https://github.com/FIU-SEDS/cmfs.git
 cd cmfs
-just --list
 ```
 
-If `just` is missing, complete the setup guide first. If you don't have physical hardware, you can still contribute to documentation, host-side tests, the flight-state machine, and some reusable libraries.
+Run `just --list` if `just` is installed. If you don't have physical hardware, you can still contribute to documentation, host-side tests, the flight-state machine, and some reusable libraries.
 
-### Where things live
-
-```text
-cmfs/
-├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── 01-task.yml
-│   │   ├── 02-bug.yml
-│   │   ├── 03-spike.yml
-│   │   └── config.yml
-│   └── PULL_REQUEST_TEMPLATE.md
-├── crates/                    # Reusable Rust logic / device interfaces
-├── docs/                      # Setup, architecture, roadmap, workflow
-│   └── DEVELOPMENT.md         # This guide
-├── fw-flight-computer/
-│   ├── .cargo/config.toml      # Embedded target and linker configuration
-│   ├── Cargo.toml             # Firmware workspace manifest
-│   └── app/
-│       ├── Cargo.toml         # Firmware application's dependencies
-│       └── src/main.rs        # no_std entry point / board bring-up
-├── just/                      # Optional split-out command recipes
-├── tools/                     # Host utilities / scripts
-├── justfile                   # Developer command entry point
-├── AGENTS.md
-├── CONTRIBUTING.MD
-└── README.md
-```
-
-This is the **intended organization**. Some directories/files may not exist or may still be under development; consult the repository before creating new ones.
+See the [architecture guide](ARCHITECTURE.md) for the planned locations of board startup, sensor drivers, portable logic, and host tools.
 
 ---
 
@@ -77,7 +48,7 @@ Use **GitHub Issues** for actionable deliverables and **one GitHub Project** to 
 | --- | --- | --- |
 | **Task / Feature** (`01-task.yml`) | A deliverable with acceptance criteria | Read an IMU over SPI |
 | **Bug Report** (`02-bug.yml`) | Something that behaves incorrectly | Sensor init fails intermittently |
-| **Technical Spike** (`03-spike.yml`) | A short experiment to answer an uncertainty | Validate FreeRTOS scheduler startup with the Rust BSP |
+| **Technical Spike** (`03-spike.yml`) | A short experiment to answer an uncertainty | Validate FreeRTOS scheduler startup with the selected Teensy board support |
 
 Create issues using **GitHub → Issues → New issue**. Write a clear objective, observable acceptance criteria, and a verification plan. Link related work and blockers.
 
@@ -153,11 +124,11 @@ Choose a descriptive branch prefix:
 ### Step 3 — Implement a focused change
 
 - Keep changes limited to the issue's objective.
-- Prefer **safe Rust**, clear types, and small modules.
-- Put reusable, hardware-independent behavior in `crates/` where practical; keep board startup, pin ownership, and FreeRTOS coordination under `fw-flight-computer/app/`.
+- Use clear C++ types, explicit resource ownership, and small modules.
+- Keep portable logic independent of Teensy and FreeRTOS APIs. Put board startup, pin ownership, and task coordination under `fw-flight-computer/`.
 - Do not place flight-state decisions inside sensor drivers. Drivers measure; flight logic evaluates; application tasks orchestrate.
 - Record assumptions about pinouts, sensor addresses, interrupt ownership, task priorities, stacks, synchronization, and failure behavior when relevant.
-- If integrating C/FreeRTOS, document any `unsafe`/FFI boundaries and do not assume the BSP and RTOS can independently own the same exception handlers.
+- When calling C or FreeRTOS APIs from C++, document linkage, ownership, and callback lifetimes. Confirm which component owns each exception handler.
 
 Commit small, reviewable steps:
 
@@ -167,33 +138,16 @@ git commit -m "feat: add barometer initialization"
 git push -u origin feature/barometer-driver
 ```
 
-Replace `<files-you-changed>` with actual paths. Avoid committing `target/`, generated `.hex` files, secrets, or machine-specific configuration.
+Replace `<files-you-changed>` with actual paths. Avoid committing generated firmware and build directories, secrets, or machine-specific configuration.
 
 ### Step 4 — Validate your work
 
-Run `just --list` first. **Only run and report recipes that actually exist on your branch.** Intended commands include:
-
-| Command | Purpose | Notes |
-| --- | --- | --- |
-| `just fmt-check` | Rust formatting check | May be named differently until implemented |
-| `just lint` | Rust Clippy checks | Target and host configurations may differ |
-| `just test` | Host-side automated tests | Cannot prove Teensy behavior |
-| `just build` | Build embedded firmware | Uses firmware Cargo workspace/toolchain |
-| `just hex` | Produce a flashable image | Expected artifact: `cmfs-bringup.hex` |
-| `just flash` | Program the test board | Requires authorized hardware and safe setup |
-| `just ci-checks` | Consolidated checks | Use only after the recipe exists |
-
-For direct Cargo commands, run from the appropriate workspace. The firmware's `.cargo/config.toml` is under `fw-flight-computer/`:
-
-```bash
-cd fw-flight-computer
-cargo build --release
-```
+For firmware changes, apply the project's formatting with `just fmt`, review the diff, and compile the Teensy target with `just build`. Run the [host tests](SETUP.md#run-host-tests) for portable code. For documentation changes, check links and verify that the described commands and paths match the checkout. See the [setup guide](SETUP.md) for tool requirements.
 
 **Report verification accurately:**
 
 - **Host-tested:** Unit tests or tools ran on a development computer.
-- **Target-built:** Firmware compiled for the Teensy 4.1 target (`thumbv7em-none-eabihf`).
+- **Target-built:** Firmware compiled for Teensy 4.1.
 - **Hardware-tested:** Firmware was flashed onto a real test board and the behavior was observed.
 
 These are **not interchangeable**. If you cannot test on hardware, say so in the PR. Never treat a successful build as proof of sensor readings, FreeRTOS scheduling, or safe flight behavior.
@@ -263,11 +217,11 @@ A **technical spike** is done when it produces a reproducible experiment, result
 
 ## 5. Recommended first contributions
 
-If you're new to Rust, FreeRTOS, or the codebase, start with a small issue:
+If you're new to C++, FreeRTOS, or the codebase, start with a small issue:
 
 1. **Documentation:** Verify the setup guide on your computer and fix missing steps.
-2. **Host Rust test:** Add unit tests for a `FlightState` transition or invalid sensor sample.
-3. **Hardware bring-up:** Reproduce the current buzzer demo on the approved test board and document results.
+2. **Host C++ test:** Add unit tests for a `FlightState` transition or invalid sensor sample.
+3. **Hardware bring-up:** Once the C++ build is available, verify board startup in an approved bench setup and record the result.
 4. **Driver experiment:** Read one sensor ID/register and report success/error codes; do not build an entire sensor stack at once.
 5. **FreeRTOS spike:** Create a narrowly scoped experiment proving kernel startup and two task executions; document startup/interrupt ownership.
 
@@ -292,7 +246,7 @@ Issue types:     Task / Feature | Bug Report | Technical Spike
 Branch format:   type/short-description
 PR requirements: Related issue + summary + validation + reviewer
 Merge strategy:  Squash and merge
-Primary commands: just --list, just fmt-check, just lint, just test, just build
+Recipe discovery: just --list
 ```
 
-**Related documents:** [Setup](SETUP.md) · [Contribution rules](../CONTRIBUTING.MD) · [Agent guide](../AGENTS.md) · [Project roadmap](ROADMAP.md) · [Repository](https://github.com/FIU-SEDS/cmfs)
+**Related documents:** [Setup](SETUP.md) · [Contribution rules](../CONTRIBUTING.MD) · [Agent guide](../AGENTS.md) · [Architecture](ARCHITECTURE.md) · [Repository](https://github.com/FIU-SEDS/cmfs)
